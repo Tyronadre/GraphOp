@@ -9,7 +9,9 @@ public class DefaultValueTextField extends JTextField {
     public DefaultValueTextField(String hint, int columns) {
         this.hint = hint;
         setColumns(columns);
-        setMinimumSize(new Dimension(80, 5));
+        addPropertyChangeListener(evt -> {
+            System.out.println(evt);
+        });
     }
 
     public String getTextOrDefault() {
@@ -33,5 +35,25 @@ public class DefaultValueTextField extends JTextField {
             g.setColor(new Color(c2, true));
             g.drawString(hint, ins.left, h / 2 + fm.getAscent() / 2 - 2);
         }
+    }
+
+    @Override
+    public void revalidate() {
+        super.revalidate();
+    }
+
+    @Override
+    public void validate() {
+        super.validate();
+    }
+
+    @Override
+    public void setSize(int width, int height) {
+        super.setSize(width, height);
+    }
+
+    @Override
+    public void setSize(Dimension d) {
+        super.setSize(d);
     }
 }

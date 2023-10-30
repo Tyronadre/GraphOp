@@ -34,9 +34,9 @@ public class Panel_InputData extends JPanel {
 
             var newRectanglePanel = new RectanglePanel(rectangle);
             panels.put(rectangle, newRectanglePanel);
-            System.out.println(newRectanglePanel.getSize());
             this.add(newRectanglePanel);
-            System.out.println(newRectanglePanel.getSize());
+            validate();
+            revalidate();
         }
     }
 
@@ -44,9 +44,6 @@ public class Panel_InputData extends JPanel {
         for (RectangleData data : rectangleData) {
             addRectangle(data);
         }
-        this.revalidate();
-        System.out.println(this.getSize());
-
     }
 
     public void reset() {
@@ -54,29 +51,33 @@ public class Panel_InputData extends JPanel {
         panels.clear();
         this.removeAll();
     }
-
-
-
-    @Override
-    public void repaint() {
-        super.repaint();
-
-    }
 }
 
 class RectanglePanel extends JPanel {
     private final Shape rectangle;
-    private int count;
     private final JLabel label;
+    private int count;
+
     public RectanglePanel(Shape rectangle) {
+        if (rectangle == null) {
+            throw new IllegalArgumentException("Rectangle must not be null");
+        }
         this.rectangle = rectangle;
         this.label = new JLabel();
         this.add(label);
-        this.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.BLACK));
-        this.setMinimumSize(new Dimension(rectangle.getBounds().width, rectangle.getBounds().height));
-        this.setSize(getMinimumSize());
-        this.setLayout(new FlowLayout(FlowLayout.RIGHT));
         setCount(1);
+        this.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.BLACK));
+        this.setLayout(new FlowLayout(FlowLayout.RIGHT));
+    }
+
+    @Override
+    public void validate() {
+        System.out.println("validating " + rectangle);
+        if (rectangle != null && this.getGraphics() != null) {
+            this.setMinimumSize(new Dimension(rectangle.getBounds().width + 6 + 3 + this.getGraphics().getFontMetrics().stringWidth(label.getText()), Math.max(rectangle.getBounds().height , 20)));
+            this.setPreferredSize(getMinimumSize());
+            System.out.println("Revalidating " + rectangle + " new MinimumSize: " + this.getMinimumSize());
+        } super.validate();
     }
 
     public void updateCount() {

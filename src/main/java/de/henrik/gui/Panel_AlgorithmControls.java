@@ -42,7 +42,7 @@ public class Panel_AlgorithmControls extends JPanel {
                 AbstractAlgorithm.setSlow(true);
             }
         });
-        algoFast.setPreferredSize(new Dimension(100, 20));
+        algoFast.setPreferredSize(new Dimension(200, 20));
         JPanel speedPanel = new JPanel();
         speedPanel.setLayout(new BoxLayout(speedPanel, BoxLayout.X_AXIS));
         speedPanel.setBorder(BorderFactory.createTitledBorder("SpeedControl"));

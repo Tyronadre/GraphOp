@@ -25,8 +25,8 @@ public class RectangleDataGenerator extends AbstactGenerator {
         var rectangles = new ArrayList<RectangleData>();
 
         for (int i = 0; i < numberOfRectangles; i++) {
-            int width = random.nextInt(maxSize - minSize) + minSize;
-            int height = random.nextInt(maxSize - minSize) + minSize;
+            int width = (maxSize - minSize == 0 ? 0 : random.nextInt(maxSize - minSize)) + minSize;
+            int height = (maxSize - minSize == 0 ? 0 : random.nextInt(maxSize - minSize)) + minSize;
             rectangles.add(new RectangleData(width, height));
         }
 
