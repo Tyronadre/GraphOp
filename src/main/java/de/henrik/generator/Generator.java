@@ -5,5 +5,9 @@ import de.henrik.data.Data;
 import java.util.List;
 
 public interface Generator <T extends Data> {
-    List<T> generate();
+    void generate();
+
+    List<T> getData();
+
+    void reset();
 }

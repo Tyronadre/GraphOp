@@ -1,26 +1,37 @@
 package de.henrik.gui;
 
 import de.henrik.algorithm.AbstractAlgorithm;
-import de.henrik.algorithm.LocalSearchAlgorithm;
+import de.henrik.algorithm.GreedyAlgorithm.DR_PutInFirst;
+import de.henrik.algorithm.GreedyAlgorithm.DR_PutInFirstSorted;
+import de.henrik.algorithm.GreedyAlgorithm.DR_TakeBiggest;
+import de.henrik.algorithm.GreedyAlgorithm.DR_TakeBiggestSorted;
+import de.henrik.algorithm.GreedyAlgorithm.GreedyAlgorithm;
+import de.henrik.algorithm.LocalSearchAlgorithm.LocalSearchAlgorithm;
+import de.henrik.data.BoxData;
+import de.henrik.data.RectangleData;
+import de.henrik.gui.extraComponents.DefaultValueTextField;
+import de.henrik.gui.extraComponents.ProgressButton;
 
 import javax.swing.*;
 import java.awt.*;
+import java.text.DecimalFormat;
 import java.util.Objects;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class Panel_AlgorithmControls extends JPanel {
     private final JButton cancelAlgo = new JButton("Force Stop Algorithm");
     private final DefaultValueTextField seed = new DefaultValueTextField("Random", 1);
     private final JLabel seedLabel = new JLabel("Seed:");
-    private final JButton algo1 = new JButton("Local Search");
-    private final JButton algo2 = new JButton("Greedy Algorithm");
+    private final ProgressButton algo1 = new ProgressButton("Local Search");
+    private final ProgressButton algo2 = new ProgressButton("Greedy Algorithm");
     private final JButton algoPause = new JButton("Pause Algorithm");
     private final JButton verbose = new JButton("Verbose");
 
     public Panel_AlgorithmControls(Gui frame) {
         //SpeedPanel
         JSlider algoSpeed = new JSlider(0, 1000, 100);
-        JButton algoFast = new JButton("Run Fast");
+        JButton algoFast = new JButton("Run Slow");
         algoSpeed.addChangeListener(e -> {
             if (algoSpeed.getValue() == 0) {
                 algoSpeed.setValue(10);
@@ -79,20 +90,44 @@ public class Panel_AlgorithmControls extends JPanel {
         });
 
         //Algorithms
+        var stategyAlgo1 = new JComboBox<>(new String[]{"Geometriebasiert", "Regelbasiert", "Überlappungen teilweise zulassen"});
         algo1.addActionListener(ActionListener -> {
+            frame.getPanel_OutputData().reset();
             try {
-                new LocalSearchAlgorithm(this.seed.getText().isEmpty() ? new Random().nextLong() : Long.parseLong(this.seed.getText())).runAlgorithm();
+                var algo = new LocalSearchAlgorithm(this.seed.getText().isEmpty() ? new Random().nextLong() : Long.parseLong(this.seed.getText()));
+                algo.addProgressListener(e -> algo1.setProgress(e.getProgress()));
+                new Thread().start();
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this, "Please enter valid numbers.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
+        var strategyAlgo2 = new JComboBox<>(new String[]{"PutInFirst", "TakeBiggest", "PutInFirstSorted", "TakeBiggestSorted"});
         algo2.addActionListener(ActionListener -> {
             try {
-                new LocalSearchAlgorithm(this.seed.getText().isEmpty() ? new Random().nextLong() : Long.parseLong(this.seed.getText())).runAlgorithm();
+                frame.getPanel_OutputData().reset();
+                var algo = new GreedyAlgorithm<>(this.seed.getText().isEmpty() ? new Random().nextLong() : Long.parseLong(this.seed.getText()), frame.getPanel_InputData().getData(), switch ((String) Objects.requireNonNull(strategyAlgo2.getSelectedItem())) {
+                    case "PutInFirst" ->
+                            new DR_PutInFirst(frame.getPanel_InputData().getBoxWidth(), frame.getPanel_InputData(), frame.getPanel_OutputData());
+                    case "TakeBiggest" ->
+                            new DR_TakeBiggest(frame.getPanel_InputData().getBoxWidth(), frame.getPanel_InputData(), frame.getPanel_OutputData());
+                    case "PutInFirstSorted" ->
+                            new DR_PutInFirstSorted(frame.getPanel_InputData().getBoxWidth(), frame.getPanel_InputData(), frame.getPanel_OutputData());
+                    case "TakeBiggestSorted" ->
+                            new DR_TakeBiggestSorted(frame.getPanel_InputData().getBoxWidth(), frame.getPanel_InputData(), frame.getPanel_OutputData());
+                    default -> throw new IllegalStateException("Unexpected value: " + strategyAlgo2.getSelectedItem());
+                });
+                algo.addProgressListener(e -> algo2.setProgress(e.getProgress()));
+                algo1.setEnabled(false);
+                frame.getPanel_DataControls().setEnabled(false);
+                algo.onFinish(() -> frame.getPanel_DataControls().setEnabled(true));
+                algo.onFinish(() -> frame.getPanel_InputData().repaint());
+                algo.onFinish(() -> JOptionPane.showMessageDialog(this, "Finished: Used Boxes=" + algo.getSolution().stream().map(RectangleData::getBoxData).distinct().count(), "Finished", JOptionPane.INFORMATION_MESSAGE));
+                new Thread(algo).start();
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this, "Please enter valid numbers.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
+
 
         //Add Components
         this.setLayout(new GridBagLayout());
@@ -126,8 +161,16 @@ public class Panel_AlgorithmControls extends JPanel {
         c.gridy = 6;
         this.add(algo1, c);
         c.gridx = 1;
+        this.add(stategyAlgo1, c);
+        c.gridy = 7;
+        c.gridx = 0;
         this.add(algo2, c);
+        c.gridx = 1;
+        this.add(strategyAlgo2, c);
+    }
 
-
+    public void reset(){
+        algo1.reset();
+        algo2.reset();
     }
 }

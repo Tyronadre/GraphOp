@@ -2,11 +2,9 @@ package de.henrik.generator;
 
 import de.henrik.data.RectangleData;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
-public class RectangleDataGenerator extends AbstactGenerator {
+public class RectangleDataGenerator extends AbstactGenerator<RectangleData> {
     private final int minSize;
     private final int maxSize;
     private final int numberOfRectangles;
@@ -19,25 +17,25 @@ public class RectangleDataGenerator extends AbstactGenerator {
     }
 
     @Override
-    public List<RectangleData> generate() {
+    public void generate() {
         Random random = new Random(seed);
-
-        var rectangles = new ArrayList<RectangleData>();
-
         for (int i = 0; i < numberOfRectangles; i++) {
-            int width = (maxSize - minSize == 0 ? 0 : random.nextInt(maxSize - minSize)) + minSize;
-            int height = (maxSize - minSize == 0 ? 0 : random.nextInt(maxSize - minSize)) + minSize;
-            rectangles.add(new RectangleData(width, height));
+            int width = (maxSize - minSize == 0 ? 0 : random.nextInt(maxSize - minSize + 1)) + minSize;
+            int height = (maxSize - minSize == 0 ? 0 : random.nextInt(maxSize - minSize + 1)) + minSize;
+            if (width > height) {
+                int temp = width;
+                width = height;
+                height = temp;
+            }
+            generatedData.add(new RectangleData(width, height));
         }
 
-        rectangles.sort((o1, o2) -> {
-            if (o1.width() == o2.width()) {
-                return o1.height() - o2.height();
+        generatedData.sort((o1, o2) -> {
+            if (o1.getWidth() == o2.getWidth()) {
+                return o1.getHeight() - o2.getHeight();
             } else {
-                return o1.width() - o2.width();
+                return o1.getWidth() - o2.getWidth();
             }
-
         });
-        return rectangles;
     }
 }

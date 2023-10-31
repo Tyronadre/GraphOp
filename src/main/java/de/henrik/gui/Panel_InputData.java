@@ -1,6 +1,7 @@
 package de.henrik.gui;
 
 import de.henrik.data.RectangleData;
+import de.henrik.generator.Generator;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,33 +11,41 @@ import java.util.List;
 
 public class Panel_InputData extends JPanel {
 
-    private final HashMap<Shape, List<RectangleData>> rectangles;
-    private final HashMap<Shape, RectanglePanel> panels;
+    private final HashMap<Dimension, RectanglePanel> panels;
+
+    private Generator<RectangleData> generator;
+
+    private int boxWidth;
 
     public Panel_InputData() {
-        rectangles = new HashMap<>();
         panels = new HashMap<>();
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
     }
 
     public void addRectangle(RectangleData rectangleData) {
-        var rectangle = new java.awt.Rectangle(rectangleData.width(), rectangleData.height());
-        rectangle.x = 3;
-        rectangle.y = 3;
-        if (rectangles.containsKey(rectangle)) {
-            rectangles.get(rectangle).add(rectangleData);
-            panels.get(rectangle).updateCount();
-            panels.get(rectangle).repaint();
+        var dimension = new Dimension(rectangleData.getWidth(), rectangleData.getHeight());
+        if (panels.containsKey(dimension)) {
+            panels.get(dimension).increaseCount();
+            panels.get(dimension).repaint();
         } else {
-            var list = new ArrayList<RectangleData>();
-            list.add(rectangleData);
-            rectangles.put(rectangle, list);
-
-            var newRectanglePanel = new RectanglePanel(rectangle);
-            panels.put(rectangle, newRectanglePanel);
+            var newRectanglePanel = new RectanglePanel(dimension);
+            panels.put(dimension, newRectanglePanel);
             this.add(newRectanglePanel);
             validate();
-            revalidate();
+        }
+    }
+
+    public void removeRectangle(RectangleData rectangle) {
+        var dimension = new Dimension(rectangle.getWidth(), rectangle.getHeight());
+        if (panels.containsKey(dimension)) {
+            var panel = panels.get(dimension);
+            panel.decreaseCount();
+            if (panel.getCount() == 0) {
+                panels.remove(dimension);
+                this.remove(panel);
+                validate();
+            } else
+                panel.repaint();
         }
     }
 
@@ -47,10 +56,33 @@ public class Panel_InputData extends JPanel {
     }
 
     public void reset() {
-        rectangles.clear();
         panels.clear();
         this.removeAll();
+        this.generator = null;
     }
+
+    public void setGenerator(Generator<RectangleData> generator) {
+        this.generator = generator;
+    }
+
+    public List<RectangleData> getData() {
+        if (generator == null) {
+            JOptionPane.showMessageDialog(this, "Generator must not be null", "Error", JOptionPane.ERROR_MESSAGE);
+            throw new IllegalStateException("Generator must not be null");
+        } else {
+            return generator.getData();
+        }
+    }
+
+    public int getBoxWidth() {
+        return boxWidth;
+    }
+
+    public void setBoxWidth(int boxWidth) {
+        this.boxWidth = boxWidth;
+    }
+
+
 }
 
 class RectanglePanel extends JPanel {
@@ -58,36 +90,47 @@ class RectanglePanel extends JPanel {
     private final JLabel label;
     private int count;
 
-    public RectanglePanel(Shape rectangle) {
-        if (rectangle == null) {
-            throw new IllegalArgumentException("Rectangle must not be null");
+    public RectanglePanel(Dimension dimension) {
+        if (dimension == null) {
+            throw new IllegalArgumentException("Dimension must not be null");
         }
-        this.rectangle = rectangle;
+        this.rectangle = new Rectangle(3,3, dimension.width, dimension.height);
         this.label = new JLabel();
         this.add(label);
         setCount(1);
         this.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.BLACK));
         this.setLayout(new FlowLayout(FlowLayout.RIGHT));
+
+//        this.setMinimumSize(new Dimension(rectangle.getBounds().width + 25, Math.max(rectangle.getBounds().height + 6 , 20)));
+//        this.setPreferredSize(getMinimumSize());
     }
 
     @Override
     public void validate() {
-        System.out.println("validating " + rectangle);
         if (rectangle != null && this.getGraphics() != null) {
-            this.setMinimumSize(new Dimension(rectangle.getBounds().width + 6 + 3 + this.getGraphics().getFontMetrics().stringWidth(label.getText()), Math.max(rectangle.getBounds().height , 20)));
+            this.setMinimumSize(new Dimension(rectangle.getBounds().width + 25, Math.max(rectangle.getBounds().height + 6, 25)));
             this.setPreferredSize(getMinimumSize());
-            System.out.println("Revalidating " + rectangle + " new MinimumSize: " + this.getMinimumSize());
-        } super.validate();
+        }
+        super.validate();
     }
 
-    public void updateCount() {
+    public void increaseCount() {
         count++;
+        label.setText(count + " x : (" + rectangle.getBounds().width + " x " + rectangle.getBounds().height + ") ");
+    }
+
+    public void decreaseCount(){
+        count--;
         label.setText(count + " x : (" + rectangle.getBounds().width + " x " + rectangle.getBounds().height + ") ");
     }
 
     public void setCount(int i) {
         count = i;
         label.setText(count + " x : (" + rectangle.getBounds().width + " x " + rectangle.getBounds().height + ") ");
+    }
+
+    public int getCount(){
+        return count;
     }
 
     @Override

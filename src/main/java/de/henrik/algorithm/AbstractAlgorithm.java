@@ -1,5 +1,8 @@
 package de.henrik.algorithm;
 
+import de.henrik.gui.ProgressListener;
+
+import javax.swing.event.ChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -10,19 +13,26 @@ public abstract class AbstractAlgorithm implements Runnable, Algorithm {
     protected static boolean verbose = false;
     protected static boolean oneStep = false;
     protected static boolean pause = false;
-    protected static boolean slow = true;
+    protected static boolean slow = false;
     protected static boolean cancel = false;
     protected static int SLOW_TIME = 100;
     private static AbstractAlgorithm algorithm = null;
-    private List<Runnable> onFinishListener = new ArrayList<>();
+    protected List<Runnable> onFinishListener = new ArrayList<>();
 
-    Random random;
-    Long seed;
+    protected final List<ProgressListener> progressListeners = new ArrayList<>();
+
+    protected Long seed;
 
     protected AbstractAlgorithm(long seed) {
-        random = new Random(seed);
         this.seed = seed;
     }
+
+    public void addProgressListener(ProgressListener l) {
+        progressListeners.add(l);
+    }
+
+    protected abstract void fireStateChanged();
+
 
     public static void step() {
         AbstractAlgorithm.pause = false;
@@ -70,6 +80,7 @@ public abstract class AbstractAlgorithm implements Runnable, Algorithm {
         AbstractAlgorithm.SLOW_TIME = value;
     }
 
+    protected abstract void runAlgorithm();
 
     @Override
     public void run() {
@@ -79,9 +90,7 @@ public abstract class AbstractAlgorithm implements Runnable, Algorithm {
             var time = System.currentTimeMillis();
             runAlgorithm();
             System.out.println("Algorithm finished in " + (System.currentTimeMillis() - time) + "ms");
-            for (var listener : onFinishListener) {
-                listener.run();
-            }
+            callFinishListener();
             AbstractAlgorithm.algorithm = null;
         }
     }
@@ -90,11 +99,12 @@ public abstract class AbstractAlgorithm implements Runnable, Algorithm {
         return algorithm != null;
     }
 
-    void checkPause() {
+    protected void checkPause() {
         synchronized (this) {
             if (cancel) {
                 AbstractAlgorithm.cancel = false;
                 AbstractAlgorithm.algorithm = null;
+                callFinishListener();
                 throw new RuntimeException("Algorithm canceled");
             }
             while (pause && !oneStep) {
@@ -119,6 +129,12 @@ public abstract class AbstractAlgorithm implements Runnable, Algorithm {
 
     public void onFinish(Runnable r) {
         onFinishListener.add(r);
+    }
+
+    private void callFinishListener() {
+        for (var r : onFinishListener) {
+            r.run();
+        }
     }
 }
 

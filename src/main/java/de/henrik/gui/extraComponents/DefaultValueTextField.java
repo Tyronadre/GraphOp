@@ -1,4 +1,4 @@
-package de.henrik.gui;
+package de.henrik.gui.extraComponents;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,9 +9,6 @@ public class DefaultValueTextField extends JTextField {
     public DefaultValueTextField(String hint, int columns) {
         this.hint = hint;
         setColumns(columns);
-        addPropertyChangeListener(evt -> {
-            System.out.println(evt);
-        });
     }
 
     public String getTextOrDefault() {
@@ -38,22 +35,8 @@ public class DefaultValueTextField extends JTextField {
     }
 
     @Override
-    public void revalidate() {
-        super.revalidate();
+    public Dimension getMinimumSize() {
+        return super.getPreferredSize();
     }
 
-    @Override
-    public void validate() {
-        super.validate();
-    }
-
-    @Override
-    public void setSize(int width, int height) {
-        super.setSize(width, height);
-    }
-
-    @Override
-    public void setSize(Dimension d) {
-        super.setSize(d);
-    }
 }

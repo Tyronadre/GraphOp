@@ -1,8 +1,15 @@
-package de.henrik.algorithm;
+package de.henrik.algorithm.LocalSearchAlgorithm;
+
+import de.henrik.algorithm.AbstractAlgorithm;
 
 public class LocalSearchAlgorithm extends AbstractAlgorithm {
     public LocalSearchAlgorithm(long seed) {
         super(seed);
+    }
+
+    @Override
+    protected void fireStateChanged() {
+
     }
 
     @Override
