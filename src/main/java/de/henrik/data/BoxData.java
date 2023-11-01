@@ -6,13 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * We could work with a bool 2d array for the box, which would be more efficient, probably.
+ * Could make this more efficient if we keep track of the used size, and if this size is big enough calculate all remaining spaces and used them for the fitting methods
  */
 public class BoxData extends AbstractData implements DataStructure<RectangleData> {
     private final List<RectangleData> rectangles;
     private final int length;
     private final JPanel panel;
-    private final boolean[][] box;
     private int filledArea = 0;
 
     @Override
@@ -40,7 +39,6 @@ public class BoxData extends AbstractData implements DataStructure<RectangleData
         };
         panel.setMinimumSize(new Dimension(length + 1, length + 1));
         panel.setPreferredSize(new Dimension(length + 1, length + 1));
-        box = new boolean[length][length];
     }
 
     public void insertRectangle(RectangleData newRectangle) {
@@ -49,11 +47,6 @@ public class BoxData extends AbstractData implements DataStructure<RectangleData
         }
         rectangles.add(newRectangle);
         newRectangle.setBoxData(this);
-        for (int x = newRectangle.x(); x < newRectangle.x() + newRectangle.getWidth(); x++) {
-            for (int y = newRectangle.y(); y < newRectangle.y() + newRectangle.getHeight(); y++) {
-                box[y][x] = true;
-            }
-        }
     }
 
     private boolean canFit(RectangleData newRectangle) {
