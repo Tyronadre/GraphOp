@@ -1,4 +1,4 @@
-package de.henrik.algorithm.GreedyAlgorithm;
+package de.henrik.algorithm.geedyAlgorithm;
 
 import de.henrik.data.Data;
 

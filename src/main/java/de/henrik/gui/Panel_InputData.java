@@ -5,7 +5,6 @@ import de.henrik.generator.Generator;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -94,15 +93,12 @@ class RectanglePanel extends JPanel {
         if (dimension == null) {
             throw new IllegalArgumentException("Dimension must not be null");
         }
-        this.rectangle = new Rectangle(3,3, dimension.width, dimension.height);
+        this.rectangle = new Rectangle(3, 3, dimension.width, dimension.height);
         this.label = new JLabel();
         this.add(label);
         setCount(1);
         this.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.BLACK));
         this.setLayout(new FlowLayout(FlowLayout.RIGHT));
-
-//        this.setMinimumSize(new Dimension(rectangle.getBounds().width + 25, Math.max(rectangle.getBounds().height + 6 , 20)));
-//        this.setPreferredSize(getMinimumSize());
     }
 
     @Override
@@ -119,18 +115,18 @@ class RectanglePanel extends JPanel {
         label.setText(count + " x : (" + rectangle.getBounds().width + " x " + rectangle.getBounds().height + ") ");
     }
 
-    public void decreaseCount(){
+    public void decreaseCount() {
         count--;
         label.setText(count + " x : (" + rectangle.getBounds().width + " x " + rectangle.getBounds().height + ") ");
+    }
+
+    public int getCount() {
+        return count;
     }
 
     public void setCount(int i) {
         count = i;
         label.setText(count + " x : (" + rectangle.getBounds().width + " x " + rectangle.getBounds().height + ") ");
-    }
-
-    public int getCount(){
-        return count;
     }
 
     @Override

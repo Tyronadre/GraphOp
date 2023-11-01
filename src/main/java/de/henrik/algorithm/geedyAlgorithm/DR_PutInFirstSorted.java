@@ -1,4 +1,4 @@
-package de.henrik.algorithm.GreedyAlgorithm;
+package de.henrik.algorithm.geedyAlgorithm;
 
 import de.henrik.data.BoxData;
 import de.henrik.data.RectangleData;
@@ -15,7 +15,7 @@ import java.util.List;
  * It takes the first rectangle in the list and puts it into the first box that can fit it.
  */
 public class DR_PutInFirstSorted implements DecisionRule<RectangleData> {
-    List<BoxData> boxes;
+    private final List<BoxData> boxes;
     public final int BOX_WIDTH;
     private final Panel_OutputData panel_outputData;
     private final Panel_InputData panel_inputData;

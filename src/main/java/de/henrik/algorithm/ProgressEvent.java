@@ -1,7 +1,7 @@
 package de.henrik.algorithm;
 
 public class ProgressEvent {
-    float newProgress;
+    private final float newProgress;
 
     public ProgressEvent(float newProgress) {
         this.newProgress = newProgress;

@@ -104,4 +104,17 @@ public class RectangleData extends AbstractData {
     public void setBoxData(BoxData boxData) {
         this.boxData = boxData;
     }
+
+    public Point getPosition() {
+        return new Point(x, y);
+    }
+
+    public Dimension getDimension() {
+        return new Dimension(width, height);
+    }
+
+    public void setDimension(Dimension dimension) {
+        this.width = dimension.width;
+        this.height = dimension.height;
+    }
 }

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstactGenerator<T extends Data> implements Generator<T> {
-    protected long seed;
+    protected final long seed;
     List<T> generatedData;
 
     AbstactGenerator (long seed) {

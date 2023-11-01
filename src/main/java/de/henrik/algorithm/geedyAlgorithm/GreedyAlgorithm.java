@@ -1,14 +1,11 @@
-package de.henrik.algorithm.GreedyAlgorithm;
+package de.henrik.algorithm.geedyAlgorithm;
 
 import de.henrik.algorithm.AbstractAlgorithm;
 import de.henrik.algorithm.ProgressEvent;
 import de.henrik.data.Data;
-import de.henrik.generator.Generator;
 
-import javax.swing.event.ChangeEvent;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 

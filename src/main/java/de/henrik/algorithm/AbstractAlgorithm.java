@@ -2,10 +2,8 @@ package de.henrik.algorithm;
 
 import de.henrik.gui.ProgressListener;
 
-import javax.swing.event.ChangeListener;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 
 public abstract class AbstractAlgorithm implements Runnable, Algorithm {
@@ -17,11 +15,11 @@ public abstract class AbstractAlgorithm implements Runnable, Algorithm {
     protected static boolean cancel = false;
     protected static int SLOW_TIME = 100;
     private static AbstractAlgorithm algorithm = null;
-    protected List<Runnable> onFinishListener = new ArrayList<>();
+    protected final List<Runnable> onFinishListener = new ArrayList<>();
 
     protected final List<ProgressListener> progressListeners = new ArrayList<>();
 
-    protected Long seed;
+    protected final Long seed;
 
     protected AbstractAlgorithm(long seed) {
         this.seed = seed;

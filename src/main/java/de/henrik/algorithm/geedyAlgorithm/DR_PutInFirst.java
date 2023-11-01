@@ -1,4 +1,4 @@
-package de.henrik.algorithm.GreedyAlgorithm;
+package de.henrik.algorithm.geedyAlgorithm;
 
 import de.henrik.data.BoxData;
 import de.henrik.data.RectangleData;
@@ -13,10 +13,10 @@ import java.util.List;
  * It takes the first rectangle in the list and puts it into the first box that can fit it.
  */
 public class DR_PutInFirst implements DecisionRule<RectangleData> {
-    List<BoxData> boxes;
     public final int BOX_WIDTH;
     private final Panel_OutputData panel_outputData;
     private final Panel_InputData panel_inputData;
+    private final List<BoxData> boxes;
 
     public DR_PutInFirst(int boxWidth, Panel_InputData panel_inputData, Panel_OutputData panel_outputData) {
         this.boxes = new ArrayList<>();
@@ -28,21 +28,16 @@ public class DR_PutInFirst implements DecisionRule<RectangleData> {
 
     @Override
     public RectangleData decide(List<RectangleData> data) {
-
-//        if (first) {
-//            first = false;
-//            data.sort(Comparator.comparingInt(RectangleData::getSize));
-//            Collections.reverse(data);
-//        }
-
         var rectangle = data.get(0);
         panel_inputData.removeRectangle(rectangle);
 
         for (var box : boxes) {
             var possiblePositions = box.getFirstFreePosition(rectangle.getWidth(), rectangle.getHeight());
             if (possiblePositions != null) {
-                box.add(possiblePositions);
-                return data.get(0);
+                rectangle.setPosition(possiblePositions.getPosition());
+                rectangle.setDimension(possiblePositions.getDimension());
+                box.add(rectangle);
+                return rectangle;
             }
         }
         var box = new BoxData(BOX_WIDTH);

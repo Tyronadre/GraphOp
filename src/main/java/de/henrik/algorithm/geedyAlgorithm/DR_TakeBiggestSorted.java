@@ -1,4 +1,4 @@
-package de.henrik.algorithm.GreedyAlgorithm;
+package de.henrik.algorithm.geedyAlgorithm;
 
 import de.henrik.data.BoxData;
 import de.henrik.data.RectangleData;
@@ -15,7 +15,7 @@ import java.util.List;
  * It takes the biggest rectangle in the list that can still fit into the box. If there are none, it will start filling the next box.
  */
 public class DR_TakeBiggestSorted implements DecisionRule<RectangleData> {
-    List<BoxData> boxes;
+    private final List<BoxData> boxes;
 
     public final int BOX_WIDTH;
     private final Panel_OutputData panel_outputData;

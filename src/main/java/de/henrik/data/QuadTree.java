@@ -1,13 +1,9 @@
 package de.henrik.data;
 
 import java.awt.*;
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class QuadTree {
-    private int length;
+    private final int length;
     private final QuadNode root;
 
     public QuadTree(int length) {

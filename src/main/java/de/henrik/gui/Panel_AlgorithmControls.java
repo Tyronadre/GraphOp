@@ -1,23 +1,16 @@
 package de.henrik.gui;
 
 import de.henrik.algorithm.AbstractAlgorithm;
-import de.henrik.algorithm.GreedyAlgorithm.DR_PutInFirst;
-import de.henrik.algorithm.GreedyAlgorithm.DR_PutInFirstSorted;
-import de.henrik.algorithm.GreedyAlgorithm.DR_TakeBiggest;
-import de.henrik.algorithm.GreedyAlgorithm.DR_TakeBiggestSorted;
-import de.henrik.algorithm.GreedyAlgorithm.GreedyAlgorithm;
-import de.henrik.algorithm.LocalSearchAlgorithm.LocalSearchAlgorithm;
-import de.henrik.data.BoxData;
+import de.henrik.algorithm.geedyAlgorithm.*;
+import de.henrik.algorithm.localSearchAlgorithm.LocalSearchAlgorithm;
 import de.henrik.data.RectangleData;
 import de.henrik.gui.extraComponents.DefaultValueTextField;
 import de.henrik.gui.extraComponents.ProgressButton;
 
 import javax.swing.*;
 import java.awt.*;
-import java.text.DecimalFormat;
 import java.util.Objects;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 public class Panel_AlgorithmControls extends JPanel {
     private final JButton cancelAlgo = new JButton("Force Stop Algorithm");
@@ -96,7 +89,7 @@ public class Panel_AlgorithmControls extends JPanel {
             try {
                 var algo = new LocalSearchAlgorithm(this.seed.getText().isEmpty() ? new Random().nextLong() : Long.parseLong(this.seed.getText()));
                 algo.addProgressListener(e -> algo1.setProgress(e.getProgress()));
-                new Thread().start();
+                new Thread(algo).start();
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this, "Please enter valid numbers.", "Error", JOptionPane.ERROR_MESSAGE);
             }

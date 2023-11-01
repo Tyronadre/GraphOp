@@ -21,7 +21,7 @@ public class Panel_DataControl extends JPanel {
     private final DefaultValueTextField numberOfRectangles;
     private final DefaultValueTextField seed;
     private Generator<RectangleData> generator;
-    private Gui gui;
+    private final Gui gui;
 
     public Panel_DataControl(Gui gui) {
         this.gui = gui;

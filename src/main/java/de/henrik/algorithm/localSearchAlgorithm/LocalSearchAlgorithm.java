@@ -1,4 +1,4 @@
-package de.henrik.algorithm.LocalSearchAlgorithm;
+package de.henrik.algorithm.localSearchAlgorithm;
 
 import de.henrik.algorithm.AbstractAlgorithm;
 

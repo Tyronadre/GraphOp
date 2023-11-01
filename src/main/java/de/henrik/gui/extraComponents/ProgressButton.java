@@ -2,8 +2,6 @@ package de.henrik.gui.extraComponents;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 
 public class ProgressButton extends JButton {

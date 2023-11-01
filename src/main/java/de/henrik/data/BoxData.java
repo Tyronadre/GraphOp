@@ -46,6 +46,7 @@ public class BoxData extends AbstractData implements DataStructure<RectangleData
             System.err.println("Rectangle intersects with other rectangles or is out of bounds");
         }
         rectangles.add(newRectangle);
+        filledArea += newRectangle.getSize();
         newRectangle.setBoxData(this);
     }
 
