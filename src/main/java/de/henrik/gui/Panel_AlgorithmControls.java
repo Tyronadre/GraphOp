@@ -3,6 +3,7 @@ package de.henrik.gui;
 import de.henrik.algorithm.AbstractAlgorithm;
 import de.henrik.algorithm.geedyAlgorithm.*;
 import de.henrik.algorithm.localSearchAlgorithm.LocalSearchAlgorithm;
+import de.henrik.data.BoxData;
 import de.henrik.data.RectangleData;
 import de.henrik.gui.extraComponents.DefaultValueTextField;
 import de.henrik.gui.extraComponents.ProgressButton;
@@ -87,7 +88,7 @@ public class Panel_AlgorithmControls extends JPanel {
         algo1.addActionListener(ActionListener -> {
             frame.getPanel_OutputData().reset();
             try {
-                var algo = new LocalSearchAlgorithm(this.seed.getText().isEmpty() ? new Random().nextLong() : Long.parseLong(this.seed.getText()));
+                var algo = new LocalSearchAlgorithm<>(this.seed.getText().isEmpty() ? new Random().nextLong() : Long.parseLong(this.seed.getText()), new BoxData(frame.getPanel_InputData().getBoxWidth(), frame.getPanel_InputData().getRecMinSize()));
                 algo.addProgressListener(e -> algo1.setProgress(e.getProgress()));
                 new Thread(algo).start();
             } catch (NumberFormatException ex) {
@@ -99,14 +100,12 @@ public class Panel_AlgorithmControls extends JPanel {
             try {
                 frame.getPanel_OutputData().reset();
                 var algo = new GreedyAlgorithm<>(this.seed.getText().isEmpty() ? new Random().nextLong() : Long.parseLong(this.seed.getText()), frame.getPanel_InputData().getData(), switch ((String) Objects.requireNonNull(strategyAlgo2.getSelectedItem())) {
-                    case "PutInFirst" ->
-                            new DR_PutInFirst(frame.getPanel_InputData().getBoxWidth(), frame.getPanel_InputData(), frame.getPanel_OutputData());
-                    case "TakeBiggest" ->
-                            new DR_TakeBiggest(frame.getPanel_InputData().getBoxWidth(), frame.getPanel_InputData(), frame.getPanel_OutputData());
+                    case "PutInFirst" -> new DR_PutInFirst(frame.getPanel_InputData(), frame.getPanel_OutputData());
+                    case "TakeBiggest" -> new DR_TakeBiggest(frame.getPanel_InputData(), frame.getPanel_OutputData());
                     case "PutInFirstSorted" ->
-                            new DR_PutInFirstSorted(frame.getPanel_InputData().getBoxWidth(), frame.getPanel_InputData(), frame.getPanel_OutputData());
+                            new DR_PutInFirstSorted(frame.getPanel_InputData(), frame.getPanel_OutputData());
                     case "TakeBiggestSorted" ->
-                            new DR_TakeBiggestSorted(frame.getPanel_InputData().getBoxWidth(), frame.getPanel_InputData(), frame.getPanel_OutputData());
+                            new DR_TakeBiggestSorted(frame.getPanel_InputData(), frame.getPanel_OutputData());
                     default -> throw new IllegalStateException("Unexpected value: " + strategyAlgo2.getSelectedItem());
                 });
                 algo.addProgressListener(e -> algo2.setProgress(e.getProgress()));
@@ -162,7 +161,7 @@ public class Panel_AlgorithmControls extends JPanel {
         this.add(strategyAlgo2, c);
     }
 
-    public void reset(){
+    public void reset() {
         algo1.reset();
         algo2.reset();
     }

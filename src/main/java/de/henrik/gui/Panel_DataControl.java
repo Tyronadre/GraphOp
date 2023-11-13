@@ -20,7 +20,7 @@ public class Panel_DataControl extends JPanel {
     private final DefaultValueTextField upperBoundRec;
     private final DefaultValueTextField numberOfRectangles;
     private final DefaultValueTextField seed;
-    private Generator<RectangleData> generator;
+    private RectangleDataGenerator generator;
     private final Gui gui;
 
     public Panel_DataControl(Gui gui) {

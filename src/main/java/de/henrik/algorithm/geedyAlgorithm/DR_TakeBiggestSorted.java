@@ -17,7 +17,6 @@ import java.util.List;
 public class DR_TakeBiggestSorted implements DecisionRule<RectangleData> {
     private final List<BoxData> boxes;
 
-    public final int BOX_WIDTH;
     private final Panel_OutputData panel_outputData;
     private final Panel_InputData panel_inputData;
 
@@ -25,9 +24,8 @@ public class DR_TakeBiggestSorted implements DecisionRule<RectangleData> {
     private BoxData lastBox;
 
 
-    public DR_TakeBiggestSorted(int boxWidth, Panel_InputData panel_inputData, Panel_OutputData panel_outputData) {
+    public DR_TakeBiggestSorted(Panel_InputData panel_inputData, Panel_OutputData panel_outputData) {
         this.boxes = new ArrayList<>();
-        this.BOX_WIDTH = boxWidth;
         this.panel_outputData = panel_outputData;
         this.panel_inputData = panel_inputData;
     }
@@ -54,7 +52,7 @@ public class DR_TakeBiggestSorted implements DecisionRule<RectangleData> {
 
         var rec = data.get(0);
         panel_inputData.removeRectangle(rec);
-        lastBox = new BoxData(BOX_WIDTH);
+        lastBox = new BoxData(panel_inputData.getBoxWidth(), panel_inputData.getRecMinSize());
         lastBox.add(rec);
         boxes.add(lastBox);
         panel_outputData.addBox(lastBox);

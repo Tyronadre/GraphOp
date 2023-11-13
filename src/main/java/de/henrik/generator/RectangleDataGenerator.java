@@ -5,6 +5,7 @@ import de.henrik.data.RectangleData;
 import java.util.Random;
 
 public class RectangleDataGenerator extends AbstactGenerator<RectangleData> {
+    public int REC_MIN_SIZE;
     private final int minSize;
     private final int maxSize;
     private final int numberOfRectangles;
@@ -14,6 +15,7 @@ public class RectangleDataGenerator extends AbstactGenerator<RectangleData> {
         this.minSize = minSize;
         this.maxSize = maxSize;
         this.numberOfRectangles = numberOfRectangles;
+
     }
 
     @Override

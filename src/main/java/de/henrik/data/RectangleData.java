@@ -5,7 +5,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RectangleData extends AbstractData {
+public class RectangleData extends AbstractData implements Comparable<RectangleData> {
 
     private int width;
     private int height;
@@ -116,5 +116,18 @@ public class RectangleData extends AbstractData {
     public void setDimension(Dimension dimension) {
         this.width = dimension.width;
         this.height = dimension.height;
+    }
+
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    public void setHeight(int heigth){
+        this.height = heigth;
+    }
+
+    @Override
+    public int compareTo(RectangleData o) {
+        return this.getSize() - o.getSize();
     }
 }

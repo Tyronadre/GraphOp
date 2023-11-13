@@ -2,6 +2,7 @@ package de.henrik.gui;
 
 import de.henrik.data.RectangleData;
 import de.henrik.generator.Generator;
+import de.henrik.generator.RectangleDataGenerator;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,7 +13,7 @@ public class Panel_InputData extends JPanel {
 
     private final HashMap<Dimension, RectanglePanel> panels;
 
-    private Generator<RectangleData> generator;
+    private RectangleDataGenerator generator;
 
     private int boxWidth;
 
@@ -60,7 +61,7 @@ public class Panel_InputData extends JPanel {
         this.generator = null;
     }
 
-    public void setGenerator(Generator<RectangleData> generator) {
+    public void setGenerator(RectangleDataGenerator generator) {
         this.generator = generator;
     }
 
@@ -82,6 +83,9 @@ public class Panel_InputData extends JPanel {
     }
 
 
+    public int getRecMinSize() {
+        return generator.REC_MIN_SIZE;
+    }
 }
 
 class RectanglePanel extends JPanel {
