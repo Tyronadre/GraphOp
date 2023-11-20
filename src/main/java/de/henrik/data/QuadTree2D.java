@@ -1,8 +1,11 @@
 package de.henrik.data;
 
+import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.lang.Thread.sleep;
 
 public class QuadTree2D {
     private int length;
@@ -70,7 +73,7 @@ public class QuadTree2D {
             int scale = 1;
             g.setColor(Color.BLACK);
             g.drawRect(this.x * scale, this.y * scale, this.w * scale, this.h * scale);
-            g.setColor(new Color(50, 50, 50, (20 * this.getLayer())));
+            g.setColor(new Color(10, 10, 10, 200 + this.getLayer()));
             g.fillRect((this.x + 1) * scale, (this.y + 1) * scale, (this.w - 1) * scale, (this.h - 1) * scale);
 
             if (!this.isLeaf()) {
@@ -112,16 +115,16 @@ public class QuadTree2D {
                     this.split();
                 }
             } else {
-                if (rectangle.intersects(new RectangleData(UL.x, UL.y, UL.w, UL.h))) {
+                if (rectangle.intersects(UL.rectangleBounds())) {
                     this.UL.insertRectangle(rectangle);
                 }
-                if (rectangle.intersects(new RectangleData(UL.x, UL.y, UL.w, UL.h))) {
+                if (rectangle.intersects(UR.rectangleBounds())) {
                     this.UR.insertRectangle(rectangle);
                 }
-                if (rectangle.intersects(new RectangleData(UL.x, UL.y, UL.w, UL.h))) {
+                if (rectangle.intersects(LL.rectangleBounds())) {
                     this.LL.insertRectangle(rectangle);
                 }
-                if (rectangle.intersects(new RectangleData(UL.x, UL.y, UL.w, UL.h))) {
+                if (rectangle.intersects(LR.rectangleBounds())) {
                     this.LR.insertRectangle(rectangle);
                 }
             }
@@ -134,19 +137,12 @@ public class QuadTree2D {
             this.LL = new QuadNode(this, x, this.y + h / 2, w / 2, this.h / 2, l + 1);
             this.LR = new QuadNode(this, this.x + w / 2, this.y + h / 2, this.w / 2, this.h / 2, l + 1);
             for (RectangleData rectangle : this.rectangleData) {
-                if (rectangle.intersects(new RectangleData(UL.x, UL.y, UL.w, UL.h))) {
-                    this.UL.insertRectangle(rectangle);
-                }
-                if (rectangle.intersects(new RectangleData(UL.x, UL.y, UL.w, UL.h))) {
-                    this.UR.insertRectangle(rectangle);
-                }
-                if (rectangle.intersects(new RectangleData(UL.x, UL.y, UL.w, UL.h))) {
-                    this.LL.insertRectangle(rectangle);
-                }
-                if (rectangle.intersects(new RectangleData(UL.x, UL.y, UL.w, UL.h))) {
-                    this.LR.insertRectangle(rectangle);
-                }
+                insertRectangle(rectangle);
             }
+        }
+
+        private RectangleData rectangleBounds() {
+            return new RectangleData(x, y, w, h);
         }
     }
 
@@ -156,6 +152,47 @@ public class QuadTree2D {
 
     public String toString() {
         return "QuadTree{" + "length=" + length + ", root=" + root + '}';
+    }
+
+
+    public static void main(String[] args) throws InterruptedException {
+        JFrame frame = new JFrame();
+        var tree = new QuadTree2D(1000);
+        JPanel panel = new JPanel() {
+            @Override
+            public void paint(Graphics g) {
+                super.paint(g);
+                tree.paint(g);
+            }
+        };
+        frame.add(panel);
+
+
+        frame.setVisible(true);
+        frame.setSize(1000, 1000);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+        tree.insertRectangle(new RectangleData(500, 500, 100, 100));
+        panel.repaint();
+        sleep(1000);
+        tree.insertRectangle(new RectangleData(0, 0, 100, 100));
+        panel.repaint();
+        sleep(1000);
+        tree.insertRectangle(new RectangleData(400, 500, 100, 100));
+        panel.repaint();
+        sleep(1000);
+        tree.insertRectangle(new RectangleData(20, 500, 3, 3));
+        tree.insertRectangle(new RectangleData(25, 500, 3, 3));
+        tree.insertRectangle(new RectangleData(28, 520, 3, 3));
+        tree.insertRectangle(new RectangleData(35, 510, 3, 3));
+        tree.insertRectangle(new RectangleData(40, 500, 3, 3));
+        tree.insertRectangle(new RectangleData(45, 510, 3, 3));
+
+        tree.insertRectangle(new RectangleData(324,781,12,80));
+        panel.repaint();
+        sleep(1000);
+        panel.repaint();
+        System.out.println(tree);
     }
 
 }

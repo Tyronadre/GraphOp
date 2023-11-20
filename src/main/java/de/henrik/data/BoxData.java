@@ -216,19 +216,21 @@ public class BoxData extends AbstractData implements DataStructure<RectangleData
 
     private void calculateFreeRectangles() {
         var freeRectangles = new ArrayList<RectangleData>();
-        var recData = new Integer[length][length * 3];
-        int lastRecID = 0, emptyRecWidth = 0;
+        var recData = new ArrayList<ArrayList<Integer>>();
+        ArrayList<Integer> recDataLine;
+        int lastRecID = -1, emptyRecWidth = 0;
         for (int y = 0; y < length; y++) {
+            recDataLine = new ArrayList<>();
             var recDataPointer = 0;
             for (int x = 0; x < length; x++) {
-                if (box[y][x] == 0) {
+                if (box[y][x] == lastRecID) {
                     emptyRecWidth++;
                 } else {
                     lastRecID = box[y][x];
-                    recData[y][recDataPointer++] = box[y][x];
-                    recData[y][recDataPointer++] = x;
+                    recDataLine.add(box[y][x]);
+                    recDataLine.add(x);
                     if (lastRecID != 0) {
-                        recData[y][recDataPointer++] = rectangles.get(lastRecID).getWidth();
+                        recDataLine.add(rectangles.get(lastRecID).getWidth());
                         x += rectangles.get(lastRecID).getWidth();
                     } else {
                         emptyRecWidth = 1;
@@ -236,10 +238,13 @@ public class BoxData extends AbstractData implements DataStructure<RectangleData
                 }
             }
             if (lastRecID == 0) {
-                recData[y][recDataPointer++] = emptyRecWidth;
+                recDataLine.add(emptyRecWidth);
             }
+            recData.add(recDataLine);
+            emptyRecWidth = 0;
+            lastRecID = -1;
         }
-        System.out.println(Arrays.deepToString(recData));
+        recData.forEach(System.out::println);
 
         /*
         var freeRectangles = new ArrayList<RectangleData>();
