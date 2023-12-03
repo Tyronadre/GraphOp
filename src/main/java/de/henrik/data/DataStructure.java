@@ -1,12 +1,7 @@
 package de.henrik.data;
 
-public interface DataStructure <T> {
+import java.util.*;
+import java.util.Collection;
 
-    /**
-     * Adds a new data unit to this data structure
-     * @param data the new data to add
-     */
-    void add(T data);
-
-    int evaluate();
+public interface DataStructure<T> extends List<T> {
 }

@@ -4,6 +4,7 @@ import de.henrik.data.BoxData;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 
 public class Panel_OutputData extends JPanel {
 
@@ -44,6 +45,22 @@ public class Panel_OutputData extends JPanel {
         view.removeAll();
         c.gridx = -1;
         c.gridy = 0;
+        validate();
+    }
+
+    public void addBoxes(List<BoxData> boxes) {
+        for (var box : boxes) {
+            if (box == null) {
+                return;
+            }
+            if (box.getLength() * (c.gridx + 2) > view.getWidth()) {
+                c.gridx = 0;
+                c.gridy++;
+            } else {
+                c.gridx++;
+            }
+            view.add(box.getPanel(), c);
+        }
         validate();
     }
 }

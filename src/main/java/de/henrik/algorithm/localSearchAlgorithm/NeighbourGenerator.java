@@ -4,5 +4,6 @@ import de.henrik.data.Data;
 import de.henrik.data.DataStructure;
 
 public interface NeighbourGenerator<V extends Data, T extends DataStructure<V>> {
-    T getRandomNeighbor();
+    T getNextNeighbour(T currentData);
+
 }

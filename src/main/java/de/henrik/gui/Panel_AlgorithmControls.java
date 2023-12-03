@@ -2,8 +2,8 @@ package de.henrik.gui;
 
 import de.henrik.algorithm.AbstractAlgorithm;
 import de.henrik.algorithm.geedyAlgorithm.*;
-import de.henrik.algorithm.localSearchAlgorithm.LocalSearchAlgorithm;
-import de.henrik.data.BoxData;
+import de.henrik.algorithm.localSearchAlgorithm.*;
+import de.henrik.data.BoxDataList;
 import de.henrik.data.RectangleData;
 import de.henrik.gui.extraComponents.DefaultValueTextField;
 import de.henrik.gui.extraComponents.ProgressButton;
@@ -88,8 +88,21 @@ public class Panel_AlgorithmControls extends JPanel {
         algo1.addActionListener(ActionListener -> {
             frame.getPanel_OutputData().reset();
             try {
-                var algo = new LocalSearchAlgorithm<>(this.seed.getText().isEmpty() ? new Random().nextLong() : Long.parseLong(this.seed.getText()), new BoxData(frame.getPanel_InputData().getBoxWidth(), frame.getPanel_InputData().getRecMinSize()));
+                var initialDataStructur = new BoxDataList(frame.getPanel_InputData().getBoxWidth(), frame.getPanel_InputData().getRecMinSize());
+                initialDataStructur.addAll(frame.getPanel_InputData().getData());
+                var seed = this.seed.getText().isEmpty() ? new Random().nextLong() : Long.parseLong(this.seed.getText());
+                var algo = new LocalSearchAlgorithm<>(seed, initialDataStructur, switch ((String) Objects.requireNonNull(stategyAlgo1.getSelectedItem())) {
+                    case "Geometriebasiert" -> new NG_GeometryBased();
+                    case "Regelbasiert" -> new NG_RuleBased(seed, frame.getPanel_InputData(), frame.getPanel_OutputData());
+                    case "Überlappungen teilweise zulassen" -> new NG_Overlapping();
+                    default -> throw new IllegalStateException("Unexpected value: " + stategyAlgo1.getSelectedItem());
+                }, new DSE_EmptySpace(frame.getPanel_InputData().getBoxWidth(), frame.getPanel_InputData().getRecMinSize()));
                 algo.addProgressListener(e -> algo1.setProgress(e.getProgress()));
+                algo2.setEnabled(false);
+                frame.getPanel_DataControls().setEnabled(false);
+                algo.onFinish(() -> frame.getPanel_DataControls().setEnabled(true));
+                algo.onFinish(() -> frame.getPanel_InputData().repaint());
+
                 new Thread(algo).start();
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this, "Please enter valid numbers.", "Error", JOptionPane.ERROR_MESSAGE);

@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Could make this more efficient if we keep track of the used size, and if this size is big enough calculate all remaining spaces and used them for the fitting methods
  */
-public class BoxData extends AbstractData implements DataStructure<RectangleData> {
+public class BoxData extends AbstractData {
     private final HashMap<Integer, RectangleData> rectangles;
     private final int length;
     private final JPanel panel;
@@ -64,8 +64,8 @@ public class BoxData extends AbstractData implements DataStructure<RectangleData
 
         //if we only have a certain space left we calculate all rectangles that are left within the box
         //if (filledArea > length * length * 0.9)
-        calculateFreeRectangles();
-        System.out.println(freeRectangles);
+        //calculateFreeRectangles();
+        //System.out.println(freeRectangles);
     }
 
     /**
@@ -87,7 +87,8 @@ public class BoxData extends AbstractData implements DataStructure<RectangleData
         }
         //test with each rectangle if it intersects (this is not very fast)
         for (RectangleData rectangle : rectangles.values()) {
-            if (rectangle.intersects(newRectangle)) return false;
+            if (rectangle.intersects(newRectangle))
+                return false;
         }
         return true;
     }
@@ -113,16 +114,11 @@ public class BoxData extends AbstractData implements DataStructure<RectangleData
         return panel;
     }
 
-    @Override
     public void add(RectangleData data) {
         insertRectangle(data);
         panel.repaint();
     }
 
-    @Override
-    public int evaluate() {
-        return 0;
-    }
 
 
     /**
@@ -171,8 +167,8 @@ public class BoxData extends AbstractData implements DataStructure<RectangleData
         RectangleData rectangleData1 = new RectangleData(0, 0, height, width);
 
         //iterate over all possible starting positions of the new rectangle
-        for (int x = 0; x <= length - width; x++) {
-            for (int y = 0; y <= length - height; y++) {
+        for (int x = 0; x < length - width; x++) {
+            for (int y = 0; y < length - height; y++) {
 
                 rectangleData.setPosition(x, y);
                 boolean intersects = false;
@@ -190,8 +186,8 @@ public class BoxData extends AbstractData implements DataStructure<RectangleData
             }
         }
 
-        for (int x = 0; x <= length - height; x++) {
-            for (int y = 0; y <= length - width; y++) {
+        for (int x = 0; x < length - height; x++) {
+            for (int y = 0; y <length - width; y++) {
                 rectangleData1.setPosition(x, y);
                 boolean intersects1 = false;
                 for (var rec : rectangles.values()) {
