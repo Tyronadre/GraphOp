@@ -86,6 +86,12 @@ public class Panel_InputData extends JPanel {
     public int getRecMinSize() {
         return generator.REC_MIN_SIZE;
     }
+
+    public void clear() {
+        panels.clear();
+        this.removeAll();
+        validate();
+    }
 }
 
 class RectanglePanel extends JPanel {

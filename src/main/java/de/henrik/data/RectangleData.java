@@ -130,4 +130,14 @@ public class RectangleData extends AbstractData implements Comparable<RectangleD
     public int compareTo(RectangleData o) {
         return this.getSize() - o.getSize();
     }
+
+    public RectangleData copy() {
+        return new RectangleData(x, y, width, height);
+    }
+
+    public void flip() {
+        var temp = width;
+        width = height;
+        height = temp;
+    }
 }

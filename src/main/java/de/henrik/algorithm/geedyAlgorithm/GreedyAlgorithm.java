@@ -14,20 +14,11 @@ public class GreedyAlgorithm<T extends Data> extends AbstractAlgorithm {
     private final List<T> data;
 
     private final List<T> solution;
-    private float progress = 0;
-
     public GreedyAlgorithm(long seed, List<T> data, DecisionRule<T> decisionRule) {
         super(seed);
         this.data = data;
         this.decisionRule = decisionRule;
         this.solution = new ArrayList<>();
-    }
-
-    @Override
-    protected void fireStateChanged() {
-        for (var l : progressListeners){
-            l.progressChanged(new ProgressEvent(progress));
-        }
     }
 
     @Override
@@ -41,7 +32,7 @@ public class GreedyAlgorithm<T extends Data> extends AbstractAlgorithm {
             solution.add(t);
             data.remove(t);
             fireStateChanged();
-            super.checkPause();
+            checkPause();
         }
         progress = 100;
         fireStateChanged();

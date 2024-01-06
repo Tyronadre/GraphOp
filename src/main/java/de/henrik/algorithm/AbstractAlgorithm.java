@@ -14,6 +14,7 @@ public abstract class AbstractAlgorithm implements Runnable, Algorithm {
     protected static boolean slow = false;
     protected static boolean cancel = false;
     protected static int SLOW_TIME = 100;
+    protected float progress = 0;
     private static AbstractAlgorithm algorithm = null;
     protected final List<Runnable> onFinishListener = new ArrayList<>();
 
@@ -29,7 +30,11 @@ public abstract class AbstractAlgorithm implements Runnable, Algorithm {
         progressListeners.add(l);
     }
 
-    protected abstract void fireStateChanged();
+    protected void fireStateChanged(){
+        for (var l : progressListeners){
+            l.progressChanged(new ProgressEvent(progress));
+        }
+    }
 
 
     public static void step() {
@@ -86,7 +91,12 @@ public abstract class AbstractAlgorithm implements Runnable, Algorithm {
             AbstractAlgorithm.algorithm = this;
             System.out.println("Starting Algorithm with seed " + seed + " slow " + slow + " verbose " + verbose);
             var time = System.currentTimeMillis();
-            runAlgorithm();
+            try {
+                runAlgorithm();
+            } catch (Exception e) {
+                e.printStackTrace();
+                callFinishListener();
+            }
             System.out.println("Algorithm finished in " + (System.currentTimeMillis() - time) + "ms");
             callFinishListener();
             AbstractAlgorithm.algorithm = null;

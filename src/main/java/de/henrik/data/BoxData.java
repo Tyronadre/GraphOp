@@ -9,17 +9,18 @@ import java.util.List;
  * Could make this more efficient if we keep track of the used size, and if this size is big enough calculate all remaining spaces and used them for the fitting methods
  */
 public class BoxData extends AbstractData {
-    private final HashMap<Integer, RectangleData> rectangles;
+    private final List<RectangleData> rectangles;
     private final int length;
     private final JPanel panel;
     private int filledArea = 0;
     private int[][] box;
 
     private List<RectangleData> freeRectangles;
+    private int recMinSize;
 
 
-    public BoxData(int length, int recMinSize) {
-        rectangles = new HashMap<>();
+    public BoxData(int length, int recMinSize, List<RectangleData> rectangles) {
+        this.rectangles = rectangles;
         this.length = length;
         box = new int[length][length];
         panel = new JPanel() {
@@ -30,7 +31,7 @@ public class BoxData extends AbstractData {
                 g2d.setColor(Color.BLACK);
                 g2d.drawRect(0, 0, length, length);
                 g2d.setColor(new Color(200, 200, 100, 20));
-                var recCopy = new ArrayList<>(rectangles.values());
+                var recCopy = new ArrayList<>(rectangles);
                 for (RectangleData rectangle : recCopy) {
                     rectangle.draw(g2d);
                 }
@@ -39,6 +40,11 @@ public class BoxData extends AbstractData {
         };
         panel.setMinimumSize(new Dimension(length + 1, length + 1));
         panel.setPreferredSize(new Dimension(length + 1, length + 1));
+        this.recMinSize = recMinSize;
+    }
+
+    public BoxData(int length, int recMinSize) {
+        this(length, recMinSize, new ArrayList<>());
     }
 
     @Override
@@ -47,25 +53,29 @@ public class BoxData extends AbstractData {
     }
 
     /**
-     * Inserts a rectangle into this box
+     * Inserts a rectangle into this box, if it fits
      *
-     * @param newRectangle the new rectangle
+     * @param rectangle the new rectangle
+     * @return {@code true} if the rectangle was inserted, {@code false} otherwise, or if the rectangle was null
      */
-    private void insertRectangle(RectangleData newRectangle) {
-        if (!canFit(newRectangle)) {
+    private boolean insertRectangle(RectangleData rectangle) {
+        if (rectangle == null) return false;
+        if (!canFit(rectangle)) {
             System.err.println("Rectangle intersects with other rectangles or is out of bounds");
+            return false;
         }
-        rectangles.put(newRectangle.getID(), newRectangle);
-        filledArea += newRectangle.getSize();
-        for (var recPoint : newRectangle.getPoints()) {
-            box[recPoint.y][recPoint.x] = newRectangle.getID();
+        rectangles.add(rectangle);
+        filledArea += rectangle.getSize();
+        for (var recPoint : rectangle.getPoints()) {
+            box[recPoint.y][recPoint.x] = rectangle.getID();
         }
-        newRectangle.setBoxData(this);
+        rectangle.setBoxData(this);
 
         //if we only have a certain space left we calculate all rectangles that are left within the box
         //if (filledArea > length * length * 0.9)
         //calculateFreeRectangles();
         //System.out.println(freeRectangles);
+        return true;
     }
 
     /**
@@ -86,7 +96,7 @@ public class BoxData extends AbstractData {
             return true;
         }
         //test with each rectangle if it intersects (this is not very fast)
-        for (RectangleData rectangle : rectangles.values()) {
+        for (RectangleData rectangle : rectangles) {
             if (rectangle.intersects(newRectangle))
                 return false;
         }
@@ -114,11 +124,23 @@ public class BoxData extends AbstractData {
         return panel;
     }
 
-    public void add(RectangleData data) {
-        insertRectangle(data);
-        panel.repaint();
+    /**
+     * Adds a rectangle to the box if it fits and repaints the panel
+     *
+     * @param rectangle the rectangle to add
+     *             @return {@code true} if the rectangle was inserted, {@code false} otherwise
+     */
+    public boolean add(RectangleData rectangle) {
+        var t = insertRectangle(rectangle);
+        if (t) panel.repaint();
+        return t;
     }
 
+    public boolean addToFirstFreePosition(RectangleData rectangle) {
+        var t = insertRectangle(getFirstFreePosition(rectangle));
+        if (t) panel.repaint();
+        return t;
+    }
 
 
     /**
@@ -145,7 +167,7 @@ public class BoxData extends AbstractData {
         if (x + height <= length && y + width <= length) {
             rectangleData1.setPosition(x, y);
             boolean intersects = false;
-            for (RectangleData rec : rectangles.values()) {
+            for (RectangleData rec : rectangles) {
                 if (rectangleData1.intersects(rec)) {
                     intersects = true;
                     break;
@@ -156,29 +178,27 @@ public class BoxData extends AbstractData {
     }
 
     /**
-     * Calculates the first free position for a given width and height. This is semi optimized!
+     * Calculates the first free position for a rectangle. The returned rectangle can be turned by 90°.
      *
-     * @param width  the width for the new rectangle
-     * @param height the height for the new rectangle
-     * @return a rectangle that does not overlap with any other rectangle in this box, or null if there is no possible position
+     * @param rectangleData  the rectangle to fit
+     *
+     * @return this given rectangle with a position that does not overlap with any other rectangle in this box, or null if there is no possible position
      */
-    public RectangleData getFirstFreePosition(int width, int height) {
-        RectangleData rectangleData = new RectangleData(0, 0, width, height);
-        RectangleData rectangleData1 = new RectangleData(0, 0, height, width);
-
+    public RectangleData getFirstFreePosition(RectangleData rectangleData) {
+        int width = rectangleData.getWidth();
+        int height = rectangleData.getHeight();
+        int[] minXPos = new int[length];
         //iterate over all possible starting positions of the new rectangle
         for (int x = 0; x < length - width; x++) {
+            x += minXPos[x];
             for (int y = 0; y < length - height; y++) {
-
                 rectangleData.setPosition(x, y);
                 boolean intersects = false;
-
-                //if it is free we check if it fits
-                // TODO: 03.11.2023 use new box + hashmap (should be faster?)
-                for (var rec : rectangles.values()) {
+                for (var rec : rectangles) {
                     if (rectangleData.intersects(rec)) {
                         intersects = true;
                         y += rec.y() + rec.getHeight() - y - 1;
+                        minXPos[x] = Math.max(minXPos[y], rec.x() + rec.getWidth());
                         break;
                     }
                 }
@@ -186,18 +206,72 @@ public class BoxData extends AbstractData {
             }
         }
 
+        rectangleData.flip();
+        minXPos = new int[length];
         for (int x = 0; x < length - height; x++) {
-            for (int y = 0; y <length - width; y++) {
-                rectangleData1.setPosition(x, y);
+            x += minXPos[x];
+            for (int y = 0; y < length - width; y++) {
+                rectangleData.setPosition(x, y);
                 boolean intersects1 = false;
-                for (var rec : rectangles.values()) {
-                    if (rectangleData1.intersects(rec)) {
+                for (var rec : rectangles) {
+                    if (rectangleData.intersects(rec)) {
                         intersects1 = true;
                         y += rec.y() + rec.getHeight() - y - 1;
                         break;
                     }
                 }
-                if (!intersects1) return rectangleData1;
+                if (!intersects1) return rectangleData;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Calculates the first free position for a given width and height. The returned rectangle can be turned by 90°.
+     *
+     * @param width  the width for the new rectangle
+     * @param height the height for the new rectangle
+     * @return a rectangle that does not overlap with any other rectangle in this box, or null if there is no possible position
+     */
+    public RectangleData getFirstFreePosition(int width, int height) {
+        RectangleData rectangleData = new RectangleData(0, 0, width, height);
+        int[] minXPos = new int[length];
+        //iterate over all possible starting positions of the new rectangle
+        for (int x = 0; x < length - width; x++) {
+            x += minXPos[x];
+            for (int y = 0; y < length - height; y++) {
+                rectangleData.setPosition(x, y);
+                boolean intersects = false;
+
+                //if it is free we check if it fits
+                // TODO: 03.11.2023 use new box + hashmap (should be faster?)
+                for (var rec : rectangles) {
+                    if (rectangleData.intersects(rec)) {
+                        intersects = true;
+                        y += rec.y() + rec.getHeight() - y - 1;
+                        minXPos[x] = Math.max(minXPos[y], rec.x() + rec.getWidth());
+                        break;
+                    }
+                }
+                if (!intersects) return rectangleData;
+            }
+        }
+
+        rectangleData.flip();
+        minXPos = new int[length];
+        for (int x = 0; x < length - height; x++) {
+            x += minXPos[x];
+            for (int y = 0; y < length - width; y++) {
+                rectangleData.setPosition(x, y);
+                boolean intersects1 = false;
+                for (var rec : rectangles) {
+                    if (rectangleData.intersects(rec)) {
+                        intersects1 = true;
+                        y += rec.y() + rec.getHeight() - y - 1;
+                        break;
+                    }
+                }
+                if (!intersects1) return rectangleData;
             }
         }
         return null;
@@ -288,6 +362,91 @@ public class BoxData extends AbstractData {
 
 
     }
+
+    public void clear() {
+        rectangles.clear();
+        filledArea = 0;
+        box = new int[length][length];
+        panel.repaint();
+    }
+
+    /**
+     * @return a deep copy of this box
+     */
+    public BoxData copy() {
+        var copy = new BoxData(length, recMinSize);
+        copy.box = new int[length][length];
+        copy.rectangles.addAll(rectangles.stream().map(RectangleData::copy).toList());
+        copy.filledArea = filledArea;
+        copy.panel.repaint();
+        return copy;
+    }
+
+    /**
+     * Recalculates the positions of all rectangles in this box in order of the list
+     */
+    public void recalculateLayout() {
+        var recCopy = new ArrayList<>(rectangles);
+        this.rectangles.clear();
+        this.box = new int[length][length];
+        this.filledArea = 0;
+        for (var rec : recCopy) {
+            addToFirstFreePosition(rec);
+        }
+    }
+
+    /**
+     * Recalculates the positions of all rectangles in this box in order of the list
+     * and returns a list of all rectangles that did not fit into this box. these rectangles will not be in the list of the box anymore
+     *
+     * @return a list of all rectangles that did not fit into this box
+     */
+    public List<RectangleData> recalculateLayoutAndReturnOverfill() {
+        var recCopy = new ArrayList<>(rectangles);
+        var overfill = new ArrayList<RectangleData>();
+        this.rectangles.clear();
+        this.box = new int[length][length];
+        this.filledArea = 0;
+        for (var rec : recCopy) {
+            var newPosition = getFirstFreePosition(rec);
+            if (newPosition == null) {
+                overfill.add(rec);
+            } else {
+                if (!add(rec)) {
+                    System.err.println("Could not add rectangle. This should not happen!");
+                }
+            }
+        }
+        return overfill;
+    }
+
+    /**
+     * Removes the rectangle at the given index from this box
+     *
+     * @param index the index of the rectangle to remove
+     * @return the removed rectangle
+     */
+    public RectangleData remove(int index) {
+        var rec = rectangles.remove(index);
+        filledArea -= rec.getSize();
+        for (var recPoint : rec.getPoints()) {
+            box[recPoint.y][recPoint.x] = 0;
+        }
+        return rec;
+    }
+
+    public List<RectangleData> getRectangles() {
+        return rectangles;
+    }
+
+    public void loadData(BoxData boxData) {
+        rectangles.clear();
+        rectangles.addAll(boxData.getRectangles());
+        filledArea = boxData.getFilledArea();
+        box = boxData.box;
+        panel.repaint();
+    }
+
 
     private static final class RecData {
         private final int id;

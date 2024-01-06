@@ -4,6 +4,7 @@ import de.henrik.algorithm.AbstractAlgorithm;
 import de.henrik.algorithm.geedyAlgorithm.*;
 import de.henrik.algorithm.localSearchAlgorithm.*;
 import de.henrik.data.BoxDataList;
+import de.henrik.data.DataStructure;
 import de.henrik.data.RectangleData;
 import de.henrik.gui.extraComponents.DefaultValueTextField;
 import de.henrik.gui.extraComponents.ProgressButton;
@@ -15,7 +16,7 @@ import java.util.Random;
 
 public class Panel_AlgorithmControls extends JPanel {
     private final JButton cancelAlgo = new JButton("Force Stop Algorithm");
-    private final DefaultValueTextField seed = new DefaultValueTextField("Random", 1);
+    private final DefaultValueTextField seed = new DefaultValueTextField("Random", 5);
     private final JLabel seedLabel = new JLabel("Seed:");
     private final ProgressButton algo1 = new ProgressButton("Local Search");
     private final ProgressButton algo2 = new ProgressButton("Greedy Algorithm");
@@ -23,7 +24,7 @@ public class Panel_AlgorithmControls extends JPanel {
     private final JButton verbose = new JButton("Verbose");
 
     public Panel_AlgorithmControls(Gui frame) {
-        //SpeedPanel
+        //SpeedPanelw
         JSlider algoSpeed = new JSlider(0, 1000, 100);
         JButton algoFast = new JButton("Run Slow");
         algoSpeed.addChangeListener(e -> {
@@ -88,21 +89,37 @@ public class Panel_AlgorithmControls extends JPanel {
         algo1.addActionListener(ActionListener -> {
             frame.getPanel_OutputData().reset();
             try {
-                var initialDataStructur = new BoxDataList(frame.getPanel_InputData().getBoxWidth(), frame.getPanel_InputData().getRecMinSize());
-                initialDataStructur.addAll(frame.getPanel_InputData().getData());
                 var seed = this.seed.getText().isEmpty() ? new Random().nextLong() : Long.parseLong(this.seed.getText());
-                var algo = new LocalSearchAlgorithm<>(seed, initialDataStructur, switch ((String) Objects.requireNonNull(stategyAlgo1.getSelectedItem())) {
+                var initialDataStructure = new BoxDataList(frame.getPanel_InputData().getBoxWidth(), frame.getPanel_InputData().getRecMinSize());
+                initialDataStructure.addAll(frame.getPanel_InputData().getData());
+                initialDataStructure.shuffel(1);
+                for (var box : initialDataStructure.getBoxes()) {
+                    frame.getPanel_OutputData().addBox(box);
+                }
+                frame.getPanel_InputData().clear();
+                var neighbourGenerator = switch ((String) Objects.requireNonNull(stategyAlgo1.getSelectedItem())) {
+                    case "Regelbasiert" ->
+                            new NG_RuleBased(seed, frame.getPanel_InputData(), frame.getPanel_OutputData());
                     case "Geometriebasiert" -> new NG_GeometryBased();
-                    case "Regelbasiert" -> new NG_RuleBased(seed, frame.getPanel_InputData(), frame.getPanel_OutputData());
                     case "Überlappungen teilweise zulassen" -> new NG_Overlapping();
                     default -> throw new IllegalStateException("Unexpected value: " + stategyAlgo1.getSelectedItem());
-                }, new DSE_EmptySpace(frame.getPanel_InputData().getBoxWidth(), frame.getPanel_InputData().getRecMinSize()));
+                };
+                LocalSearchAlgorithm<RectangleData,BoxDataList> algo = new LocalSearchAlgorithm<>(seed, initialDataStructure, neighbourGenerator, new DSE_EmptySpace(frame.getPanel_InputData().getBoxWidth(), frame.getPanel_InputData().getRecMinSize()));
                 algo.addProgressListener(e -> algo1.setProgress(e.getProgress()));
                 algo2.setEnabled(false);
                 frame.getPanel_DataControls().setEnabled(false);
                 algo.onFinish(() -> frame.getPanel_DataControls().setEnabled(true));
                 algo.onFinish(() -> frame.getPanel_InputData().repaint());
-
+                algo.onFinish(() -> {
+                    var solution = (BoxDataList) algo.getSolution();
+                    frame.getPanel_OutputData().reset();
+                    for (var box : solution.getBoxes()) {
+                        frame.getPanel_OutputData().addBox(box);
+                    }
+                    frame.getPanel_OutputData().validate();
+                    frame.getPanel_OutputData().repaint();
+                    JOptionPane.showMessageDialog(this, "Finished: Used Boxes=" + solution.getBoxes().size(), "Finished", JOptionPane.INFORMATION_MESSAGE);
+                });
                 new Thread(algo).start();
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this, "Please enter valid numbers.", "Error", JOptionPane.ERROR_MESSAGE);
