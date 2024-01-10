@@ -47,7 +47,7 @@ public class RectangleData extends AbstractData implements Comparable<RectangleD
 
     @Override
     public int hashCode() {
-        return ID;
+        return (10000 * width + height) + (10000 * x + y);
     }
 
     @Override
@@ -140,4 +140,5 @@ public class RectangleData extends AbstractData implements Comparable<RectangleD
         width = height;
         height = temp;
     }
+
 }

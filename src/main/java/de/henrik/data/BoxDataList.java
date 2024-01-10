@@ -68,20 +68,16 @@ public class BoxDataList implements DataStructure<RectangleData> {
         var rec = boxData1.remove(index1);
         var overfill = boxData1.recalculateLayoutAndReturnOverfill();
         index2 = Math.min(boxData1.getRectangles().size(), index2);
-//        if (box2 == boxDataList.size()) boxDataList.add(new BoxData(LENGTH_OF_BOX, REC_MIN_SIZE));
         if (index2 == boxData2.getRectangles().size()) boxData2.getRectangles().add(rec);
         else boxData2.getRectangles().add(index2, rec);
         overfill.addAll(boxData2.recalculateLayoutAndReturnOverfill());
         if (boxData1.getRectangles().isEmpty()) {
             remove(box1);
-            removedBoxes.put(boxData1.getID(), null);
-            changedBoxes.remove(boxData1.getID());
+            removedBoxes.put(boxData1.getID(), changedBoxes.remove(boxData1.getID()));
         }
-
-        //handle overfill and changes
-        //put at the end
+        var boxDataListSize = boxDataList.size();
         for (RectangleData rec2 : overfill) {
-            add(rec2, boxDataList.size());
+            add(rec2, boxDataListSize);
             addedBoxes.put(rec2.getBoxData().getID(), rec2.getBoxData());
         }
 
@@ -164,5 +160,27 @@ public class BoxDataList implements DataStructure<RectangleData> {
 
     public void removeBox(Integer key) {
         boxDataList.removeIf(box -> box.getID() == key);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        BoxDataList that = (BoxDataList) o;
+
+        if (LENGTH_OF_BOX != that.LENGTH_OF_BOX) return false;
+        if (REC_MIN_SIZE != that.REC_MIN_SIZE) return false;
+        if (MAX_RECS_PER_BOX != that.MAX_RECS_PER_BOX) return false;
+        return boxDataList.equals(that.boxDataList);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = LENGTH_OF_BOX;
+        result = 31 * result + REC_MIN_SIZE;
+        result = 31 * result + MAX_RECS_PER_BOX;
+        result = 31 * result + boxDataList.hashCode();
+        return result;
     }
 }

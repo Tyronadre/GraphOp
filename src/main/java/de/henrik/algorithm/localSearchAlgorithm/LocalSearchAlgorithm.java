@@ -4,11 +4,11 @@ import de.henrik.algorithm.AbstractAlgorithm;
 import de.henrik.data.Data;
 import de.henrik.data.DataStructure;
 
-public class LocalSearchAlgorithm<V extends Data, T extends DataStructure<V> > extends AbstractAlgorithm {
+public class LocalSearchAlgorithm<V extends Data, T extends DataStructure<V>> extends AbstractAlgorithm {
+    public static final int NUMBER_OF_LOOPS = 10000;
     private final NeighbourGenerator<T> neighbourGenerator;
     private final DataStructureEvaluator<T> dataStructureEvaluator;
     T current;
-    public static final int NUMBER_OF_LOOPS = 10000;
 
     public LocalSearchAlgorithm(long seed, T dataStructure, NeighbourGenerator<T> neighbourGenerator, DataStructureEvaluator<T> dataStructureEvaluator) {
         super(seed);
@@ -26,7 +26,14 @@ public class LocalSearchAlgorithm<V extends Data, T extends DataStructure<V> > e
         T bestResult = (T) current.copy();
         while (i++ <= NUMBER_OF_LOOPS) {
             fireStateChanged();
-            neighbourGenerator.nextNeighbour(current);
+            try {
+                neighbourGenerator.nextNeighbour(current);
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+                progress = 100;
+                fireStateChanged();
+                return;
+            }
             System.out.print("\r eval: " + dataStructureEvaluator.evaluate(current) + " " + i);
             if (dataStructureEvaluator.compare(current, bestResult)) {
                 bestResult = (T) current.copy();

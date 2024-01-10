@@ -60,12 +60,6 @@ public class Panel_OutputData extends JPanel {
         validate();
     }
 
-    public void addBoxes(List<BoxData> boxes) {
-        for (var box : boxes) {
-            if (addBoxHelper(box)) return;
-        }
-        validate();
-    }
 
     public void removeBox(int box) {
         view.remove(boxPanels.get(box));

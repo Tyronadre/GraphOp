@@ -11,7 +11,7 @@ import java.util.List;
 public class BoxData extends AbstractData {
     private final List<RectangleData> rectangles;
     private final int length;
-    private final JPanel panel;
+    private JPanel panel = null;
     private int filledArea = 0;
     private int[][] box;
 
@@ -23,23 +23,6 @@ public class BoxData extends AbstractData {
         this.rectangles = rectangles;
         this.length = length;
         box = new int[length][length];
-        panel = new JPanel() {
-            @Override
-            public void paintComponent(java.awt.Graphics g) {
-                super.paintComponent(g);
-                var g2d = (Graphics2D) g;
-                g2d.setColor(Color.BLACK);
-                g2d.drawRect(0, 0, length, length);
-                g2d.setColor(new Color(200, 200, 100, 20));
-                var recCopy = new ArrayList<>(rectangles);
-                for (RectangleData rectangle : recCopy) {
-                    rectangle.draw(g2d);
-                }
-            }
-
-        };
-        panel.setMinimumSize(new Dimension(length + 1, length + 1));
-        panel.setPreferredSize(new Dimension(length + 1, length + 1));
         this.recMinSize = recMinSize;
     }
 
@@ -121,6 +104,25 @@ public class BoxData extends AbstractData {
      * @return the jpanel for painting this box
      */
     public JPanel getPanel() {
+        if (panel == null){
+            panel = new JPanel() {
+                @Override
+                public void paintComponent(java.awt.Graphics g) {
+                    super.paintComponent(g);
+                    var g2d = (Graphics2D) g;
+                    g2d.setColor(Color.BLACK);
+                    g2d.drawRect(0, 0, length, length);
+                    g2d.setColor(new Color(200, 200, 100, 20));
+                    var recCopy = new ArrayList<>(rectangles);
+                    for (RectangleData rectangle : recCopy) {
+                        rectangle.draw(g2d);
+                    }
+                }
+
+            };
+            panel.setMinimumSize(new Dimension(length + 1, length + 1));
+            panel.setPreferredSize(new Dimension(length + 1, length + 1));
+        }
         return panel;
     }
 
@@ -132,13 +134,13 @@ public class BoxData extends AbstractData {
      */
     public boolean add(RectangleData rectangle) {
         var t = insertRectangle(rectangle);
-        if (t) panel.repaint();
+        if (t && panel != null) panel.repaint();
         return t;
     }
 
     public boolean addToFirstFreePosition(RectangleData rectangle) {
         var t = insertRectangle(getFirstFreePosition(rectangle));
-        if (t) panel.repaint();
+        if (t&&panel!=null) panel.repaint();
         return t;
     }
 
@@ -367,7 +369,7 @@ public class BoxData extends AbstractData {
         rectangles.clear();
         filledArea = 0;
         box = new int[length][length];
-        panel.repaint();
+        if (panel != null) panel.repaint();
     }
 
     /**
@@ -378,7 +380,6 @@ public class BoxData extends AbstractData {
         copy.box = new int[length][length];
         copy.rectangles.addAll(rectangles.stream().map(RectangleData::copy).toList());
         copy.filledArea = filledArea;
-        copy.panel.repaint();
         return copy;
     }
 
@@ -439,61 +440,31 @@ public class BoxData extends AbstractData {
         return rectangles;
     }
 
-    public void loadData(BoxData boxData) {
+    public void loadData(BoxData boxData, boolean repaint) {
         rectangles.clear();
         rectangles.addAll(boxData.getRectangles());
         filledArea = boxData.getFilledArea();
         box = boxData.box;
-        panel.repaint();
+        if (repaint) panel.repaint();
     }
 
 
-    private static final class RecData {
-        private final int id;
-        private final int x0;
-        private int width;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
-        private RecData(int id, int x0, int width) {
-            this.id = id;
-            this.x0 = x0;
-            this.width = width;
-        }
+        BoxData boxData = (BoxData) o;
 
-        public int id() {
-            return id;
-        }
-
-        public int x0() {
-            return x0;
-        }
-
-        public int width() {
-            return width;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == this) return true;
-            if (obj == null || obj.getClass() != this.getClass()) return false;
-            var that = (RecData) obj;
-            return this.id == that.id &&
-                    this.x0 == that.x0 &&
-                    this.width == that.width;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(id, x0, width);
-        }
-
-        @Override
-        public String toString() {
-            return "RecData[" +
-                    "id=" + id + ", " +
-                    "x0=" + x0 + ", " +
-                    "width=" + width + ']';
-        }
+        if (length != boxData.length) return false;
+        return rectangles.equals(boxData.rectangles);
     }
 
+    @Override
+    public int hashCode() {
+        int result = rectangles.hashCode();
+        result = 31 * result + length;
+        return result;
+    }
 }
 
