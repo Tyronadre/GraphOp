@@ -3,6 +3,7 @@ package de.henrik.gui;
 import de.henrik.algorithm.AbstractAlgorithm;
 import de.henrik.algorithm.geedyAlgorithm.*;
 import de.henrik.algorithm.localSearchAlgorithm.*;
+import de.henrik.data.BoxData;
 import de.henrik.data.BoxDataList;
 import de.henrik.data.DataStructure;
 import de.henrik.data.RectangleData;
@@ -11,6 +12,8 @@ import de.henrik.gui.extraComponents.ProgressButton;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Random;
 
@@ -90,21 +93,41 @@ public class Panel_AlgorithmControls extends JPanel {
             frame.getPanel_OutputData().reset();
             try {
                 var seed = this.seed.getText().isEmpty() ? new Random().nextLong() : Long.parseLong(this.seed.getText());
-                var initialDataStructure = new BoxDataList(frame.getPanel_InputData().getBoxWidth(), frame.getPanel_InputData().getRecMinSize());
-                initialDataStructure.addAll(frame.getPanel_InputData().getData());
-                initialDataStructure.shuffel(1);
+
+                BoxDataList initialDataStructure;
+                NeighbourGenerator<BoxDataList> neighbourGenerator;
+                DataStructureEvaluator<BoxDataList> decisionRule;
+                switch ((String) Objects.requireNonNull(stategyAlgo1.getSelectedItem())) {
+                    case "Regelbasiert" -> {
+                        initialDataStructure = new BoxDataList(frame.getPanel_InputData().getBoxWidth(), frame.getPanel_InputData().getRecMinSize());
+                        initialDataStructure.addAll(frame.getPanel_InputData().getData());
+                        initialDataStructure.shuffel(seed);
+                        neighbourGenerator = new NG_RuleBased(seed, frame.getPanel_InputData(), frame.getPanel_OutputData());
+                        decisionRule = new DSE_EmptySpace(frame.getPanel_InputData().getBoxWidth(), frame.getPanel_InputData().getRecMinSize());
+                    }
+                    case "Geometriebasiert" -> {
+                        initialDataStructure = new BoxDataList(frame.getPanel_InputData().getBoxWidth(), frame.getPanel_InputData().getRecMinSize());
+                        initialDataStructure.addAll(frame.getPanel_InputData().getData());
+                        initialDataStructure.shuffel(seed);
+                        neighbourGenerator = new NG_GeometryBased();
+                        decisionRule = new DSE_EmptySpace(frame.getPanel_InputData().getBoxWidth(), frame.getPanel_InputData().getRecMinSize());
+                    }
+                    case "Überlappungen teilweise zulassen" -> {
+                        initialDataStructure = new BoxDataList(frame.getPanel_InputData().getBoxWidth(), frame.getPanel_InputData().getRecMinSize());
+                        var box = new BoxData(frame.getPanel_InputData().getBoxWidth(), frame.getPanel_InputData().getRecMinSize());
+                        frame.getPanel_InputData().getData().forEach(box::addForce);
+                        Collections.shuffle(box.getRectangles());
+                        initialDataStructure.addBox(box);
+                        neighbourGenerator = new NG_Overlapping(seed, frame.getPanel_InputData(), frame.getPanel_OutputData());
+                        decisionRule = new DSE_EmptySpace(frame.getPanel_InputData().getBoxWidth(), frame.getPanel_InputData().getRecMinSize());
+                    }
+                    default -> throw new IllegalStateException("Unexpected value: " + stategyAlgo1.getSelectedItem());
+                }
                 for (var box : initialDataStructure.getBoxes()) {
                     frame.getPanel_OutputData().addBox(box);
                 }
                 frame.getPanel_InputData().clear();
-                var neighbourGenerator = switch ((String) Objects.requireNonNull(stategyAlgo1.getSelectedItem())) {
-                    case "Regelbasiert" ->
-                            new NG_RuleBased(seed, frame.getPanel_InputData(), frame.getPanel_OutputData());
-                    case "Geometriebasiert" -> new NG_GeometryBased();
-                    case "Überlappungen teilweise zulassen" -> new NG_Overlapping();
-                    default -> throw new IllegalStateException("Unexpected value: " + stategyAlgo1.getSelectedItem());
-                };
-                LocalSearchAlgorithm<RectangleData,BoxDataList> algo = new LocalSearchAlgorithm<>(seed, initialDataStructure, neighbourGenerator, new DSE_EmptySpace(frame.getPanel_InputData().getBoxWidth(), frame.getPanel_InputData().getRecMinSize()));
+                LocalSearchAlgorithm<RectangleData, BoxDataList> algo = new LocalSearchAlgorithm<>(seed, initialDataStructure, neighbourGenerator, decisionRule);
                 algo.addProgressListener(e -> algo1.setProgress(e.getProgress()));
                 algo2.setEnabled(false);
                 frame.getPanel_DataControls().setEnabled(false);

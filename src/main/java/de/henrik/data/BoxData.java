@@ -138,11 +138,28 @@ public class BoxData extends AbstractData {
         return t;
     }
 
+    /**
+     * Adds a rectangle to the first free position in this box and repaints the panel
+     * @param rectangle the rectangle to add
+     * @return {@code true} if the rectangle was inserted, {@code false} otherwise
+     */
     public boolean addToFirstFreePosition(RectangleData rectangle) {
         var t = insertRectangle(getFirstFreePosition(rectangle));
         if (t&&panel!=null) panel.repaint();
         return t;
     }
+
+    /**
+     * Adds a rectangle to this box, ignoring if it fits. This does not call any intermediate logic of BoxData.
+     * @param rectangle the rectangle to add
+     */
+    public void addForce(RectangleData rectangle) {
+        rectangles.add(rectangle);
+        rectangle.setBoxData(this);
+        if (panel != null) panel.repaint();
+    }
+
+
 
 
     /**
@@ -436,6 +453,20 @@ public class BoxData extends AbstractData {
         return rec;
     }
 
+    /**
+     * Removes the given rectangle from this box
+     *
+     * @param rec the rectangle to remove
+     */
+    public void remove(RectangleData rec) {
+        rectangles.remove(rec);
+        rec.setBoxData(null);
+        filledArea -= rec.getSize();
+        for (var recPoint : rec.getPoints()) {
+            box[recPoint.y][recPoint.x] = 0;
+        }
+    }
+
     public List<RectangleData> getRectangles() {
         return rectangles;
     }
@@ -447,7 +478,6 @@ public class BoxData extends AbstractData {
         box = boxData.box;
         if (repaint) panel.repaint();
     }
-
 
     @Override
     public boolean equals(Object o) {
@@ -465,6 +495,18 @@ public class BoxData extends AbstractData {
         int result = rectangles.hashCode();
         result = 31 * result + length;
         return result;
+    }
+
+    public double getMaxIntersectionPercentage(RectangleData rec) {
+        double maxIntersection = 0;
+        for (var rec2 : rectangles) {
+            maxIntersection = Math.max(maxIntersection, rec.intersectionPercentage(rec2));
+        }
+        return maxIntersection;
+    }
+
+    public int getRecMinSize() {
+        return recMinSize;
     }
 }
 

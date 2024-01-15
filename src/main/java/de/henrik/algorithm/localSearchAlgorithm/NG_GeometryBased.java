@@ -1,8 +1,6 @@
 package de.henrik.algorithm.localSearchAlgorithm;
 
 import de.henrik.data.BoxDataList;
-import de.henrik.data.DataStructure;
-import de.henrik.data.RectangleData;
 
 /**
  * Geometriebasiert: Ein Nachbar lässt sich erzeugen, indem Rechtecke direkt verschoben werden, sowohl innerhalb einer Box als auch von einer Box zur anderen.
@@ -17,7 +15,7 @@ public class NG_GeometryBased implements NeighbourGenerator<BoxDataList> {
 
 
     @Override
-    public void nextNeighbour(BoxDataList data) {
+    public void nextNeighbour(BoxDataList data, int iteration) {
 
     }
 

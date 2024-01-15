@@ -1,11 +1,7 @@
 package de.henrik.algorithm.localSearchAlgorithm;
 
-import de.henrik.data.BoxData;
 import de.henrik.data.BoxDataList;
-import de.henrik.data.DataStructure;
-import de.henrik.data.RectangleData;
 
-import java.util.ArrayList;
 import java.util.function.Function;
 
 public class DSE_EmptySpace implements DataStructureEvaluator<BoxDataList> {

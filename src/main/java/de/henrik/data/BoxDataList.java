@@ -1,7 +1,5 @@
 package de.henrik.data;
 
-import javax.swing.*;
-import java.awt.color.ICC_Profile;
 import java.util.*;
 
 /**
@@ -38,13 +36,14 @@ public class BoxDataList implements DataStructure<RectangleData> {
      * If box1 is empty after the shift, it will be removed.
      * If box2 cannot fit all rectangles after the shift, subsequent rectangles will be filled in other boxes starting from the first one.
      * <p>
-     *
+     * <p>
      * the returned map contains the boxes in the following order:
      * <ul>
      * <li>1. the box where the rectangle was removed</li>
      * <li>2. the box where the rectangle was added</li>
      * <li>3 and following: the boxes that have been added because of overfill</li>
      * </ul>
+     *
      * @param box1   box from which the rectangle will be taken
      * @param box2   box where the rectangle will be put
      * @param index1 index of rectangle that will be shifted
@@ -55,7 +54,7 @@ public class BoxDataList implements DataStructure<RectangleData> {
         if (box1 == box2 && (index2 == index1 || index2 == index1 + 1 || index2 == index1 - 1))
             return null;
         if (box1 == box2 && index2 >= index1) index2--;
-        var changedBoxes = new HashMap<Integer,BoxData>();
+        var changedBoxes = new HashMap<Integer, BoxData>();
         var removedBoxes = new HashMap<Integer, BoxData>();
         var addedBoxes = new HashMap<Integer, BoxData>();
 
@@ -63,7 +62,7 @@ public class BoxDataList implements DataStructure<RectangleData> {
         BoxData boxData2 = boxDataList.get(box2);
         changedBoxes.put(boxData1.getID(), boxData1.copy());
         if (box1 != box2) {
-            changedBoxes.put(boxData2.getID(),boxData2.copy());
+            changedBoxes.put(boxData2.getID(), boxData2.copy());
         }
         var rec = boxData1.remove(index1);
         var overfill = boxData1.recalculateLayoutAndReturnOverfill();
@@ -81,13 +80,7 @@ public class BoxDataList implements DataStructure<RectangleData> {
             addedBoxes.put(rec2.getBoxData().getID(), rec2.getBoxData());
         }
 
-        return List.of(removedBoxes,changedBoxes,addedBoxes);
-    }
-
-    record ShiftOperation(int boxID, int boxData, ShiftOperationType type) {
-        public enum ShiftOperationType {
-            REMOVE, ADD, CHANGE
-        }
+        return List.of(removedBoxes, changedBoxes, addedBoxes);
     }
 
     /**
@@ -182,5 +175,31 @@ public class BoxDataList implements DataStructure<RectangleData> {
         result = 31 * result + MAX_RECS_PER_BOX;
         result = 31 * result + boxDataList.hashCode();
         return result;
+    }
+
+    /**
+     * Adds the rectangle to the next box. Returns a box if a new Box was created
+     *
+     * @param rec     the rectangle to add
+     * @param lastBox the last box the rectangle was added to
+     * @return the new box if a new box was created, {@code null} otherwise
+     */
+    public BoxData addToNextBox(RectangleData rec, BoxData lastBox) {
+        var index = boxDataList.indexOf(lastBox);
+        if (index == boxDataList.size() - 1) {
+            var newBox = new BoxData(LENGTH_OF_BOX, REC_MIN_SIZE);
+            boxDataList.add(newBox);
+            newBox.addForce(rec);
+            return newBox;
+        }
+        var newBox = boxDataList.get(index + 1);
+        newBox.addForce(rec);
+        return null;
+    }
+
+    record ShiftOperation(int boxID, int boxData, ShiftOperationType type) {
+        public enum ShiftOperationType {
+            REMOVE, ADD, CHANGE
+        }
     }
 }

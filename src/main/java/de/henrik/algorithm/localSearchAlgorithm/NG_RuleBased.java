@@ -14,10 +14,13 @@ import java.util.*;
  * Rechtecke in der Reihenfolge der Permutation in den Boxen platziert. Als Regel
  * Die Nachbarschaft definieren Sie durch kleine Modifikationsschritte auf der Permutation. Auch hier könnte es sinnvoll sein, Rechtecke in relativ leeren Boxen
  * anderswo in der Permutation zu platzieren.
+ * <p>
+ * <p>
+ * Aktuell machen wir permutationen für jede unterschiedliche BoxDataList. es wäre bessere eine queue zu benutzen und dabei nur neue permutationen für boxen zu machen die auch verändert wurden.
  */
 public class NG_RuleBased implements NeighbourGenerator<BoxDataList> {
     private static final int NUMBER_OF_PERMUTATIONS = 1;
-    private static final boolean PAINT_EVERY_STEP = false;
+    private static final boolean PAINT_EVERY_STEP = true;
     private final Panel_OutputData panel_outputData;
     private final RandomPermutation randomPermutation;
     List<HashMap<Integer, BoxData>> lastChanges = null;
@@ -28,7 +31,7 @@ public class NG_RuleBased implements NeighbourGenerator<BoxDataList> {
     }
 
     @Override
-    public void nextNeighbour(BoxDataList data) {
+    public void nextNeighbour(BoxDataList data, int iteration) {
         for (int i = 0; i < NUMBER_OF_PERMUTATIONS; i++) {
             var permutation = randomPermutation.next(data);
             if (permutation == null) throw new IllegalStateException("No more permutations");
@@ -38,8 +41,6 @@ public class NG_RuleBased implements NeighbourGenerator<BoxDataList> {
             int index2 = permutation[3];
 
             lastChanges = data.shift(box1, box2, index1, index2);
-//            System.out.print("\r" + i + " " + box1 + " " + box2 + " " + index1 + " " + index2 + " " + lastChanges);
-
 
             if (PAINT_EVERY_STEP) {
                 if (lastChanges == null) continue;

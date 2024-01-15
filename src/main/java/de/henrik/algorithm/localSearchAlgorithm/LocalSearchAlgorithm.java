@@ -5,7 +5,7 @@ import de.henrik.data.Data;
 import de.henrik.data.DataStructure;
 
 public class LocalSearchAlgorithm<V extends Data, T extends DataStructure<V>> extends AbstractAlgorithm {
-    public static final int NUMBER_OF_LOOPS = 10000;
+    public static final int NUMBER_OF_LOOPS = 20000;
     private final NeighbourGenerator<T> neighbourGenerator;
     private final DataStructureEvaluator<T> dataStructureEvaluator;
     T current;
@@ -27,9 +27,10 @@ public class LocalSearchAlgorithm<V extends Data, T extends DataStructure<V>> ex
         while (i++ <= NUMBER_OF_LOOPS) {
             fireStateChanged();
             try {
-                neighbourGenerator.nextNeighbour(current);
+                neighbourGenerator.nextNeighbour(current, i);
             } catch (IllegalStateException e) {
                 e.printStackTrace();
+                current = bestResult;
                 progress = 100;
                 fireStateChanged();
                 return;

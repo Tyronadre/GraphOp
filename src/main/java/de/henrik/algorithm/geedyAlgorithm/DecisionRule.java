@@ -1,10 +1,8 @@
 package de.henrik.algorithm.geedyAlgorithm;
 
-import de.henrik.data.Data;
-
 import java.util.List;
 
-public interface DecisionRule <T extends Data> {
+public interface DecisionRule <T> {
     T decide(List<T> data);
 
 }

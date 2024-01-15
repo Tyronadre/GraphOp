@@ -141,4 +141,32 @@ public class RectangleData extends AbstractData implements Comparable<RectangleD
         height = temp;
     }
 
+    public double intersectionPercentage(RectangleData other) {
+        var intersectionWidth = Math.min(x + width, other.x + other.width) - Math.max(x, other.x);
+        var intersectionHeight = Math.min(y + height, other.y + other.height) - Math.max(y, other.y);
+        var intersectionArea = intersectionWidth * intersectionHeight;
+        var maxArea = Math.max(width * height, other.width * other.height);
+        return (double) intersectionArea / maxArea;
+    }
+
+
+    /**
+     * Moves the rectangle by x and y, if it is possible without going out of bounds of the box
+     * @param x x
+     * @param y y
+     * @return {@code true} if the rectangle was moved, {@code false} otherwise
+     */
+    public boolean move(int x, int y) {
+        int oldX = this.x;
+        int oldY = this.y;
+        this.x += x;
+        this.y += y;
+        if (this.x < 0 || this.y < 0 || this.x + width > boxData.getLength() || this.y + height > boxData.getLength()) {
+            this.x = oldX;
+            this.y = oldY;
+            return false;
+        }
+        return true;
+    }
+
 }
